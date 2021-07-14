@@ -1,0 +1,1022 @@
+==========================
+Grid Levels and Parameters
+==========================
+`Notebook <http://nbviewer.ipython.org/github/Unidata/python-awips/blob/master/examples/notebooks/Grid_Levels_and_Parameters.ipynb>`_
+Python-AWIPS Tutorial Notebook
+
+--------------
+
+Objectives
+==========
+
+-  Cover the relevant methods for accessing EDEX and investigating what
+   data is available.
+-  This example we look at the “grid” data type and investigate the
+   Global Forcast System (GFS) model.
+-  We will talk quite a bit about the **DataAccessLayer** utility, and
+   its `online
+   documentation <http://unidata.github.io/python-awips/api/DataAccessLayer.html#>`__
+   might be a helpful reference.
+
+--------------
+
+Table of Contents
+-----------------
+
+| `1
+  Imports <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#imports>`__\ 
+| `2 Connect to
+  EDEX <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#connect-to-edex>`__\ 
+| `3 Get a List of Supported Data
+  Types <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#get-a-list-of-supported-data-types>`__\ 
+| `4 Create a New Data Request and Set the
+  Type <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#create-a-new-data-request-and-set-the-type>`__\ 
+| `5 Get Available
+  Locations <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#get-available-locations>`__\ 
+| `6 Get Available
+  Parameters <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#get-available-parameters>`__\ 
+| `7 Get Available
+  Levels <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#get-available-levels>`__\ 
+| `8 Get Available
+  Times <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#get-available-times>`__\ 
+| `9 Get the
+  Data! <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#get-the-data>`__\ 
+| `10 See
+  Also <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#see-also>`__\ 
+|     `10.1 Related
+  Notebooks <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html#related-notebooks>`__\ 
+
+--------------
+
+1 Imports
+---------
+
+Start by importing the DataAccessLayer package from python-awips:
+
+.. code:: ipython3
+
+    from awips.dataaccess import DataAccessLayer
+
+`Top <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html>`__
+
+--------------
+
+2 Connect to EDEX
+-----------------
+
+Define a url for your EDEX connection, and then point python-awips at
+that EDEX
+
+.. code:: ipython3
+
+    # Unidata's cloud EDEX instance is used in this example
+    edex_url = "edex-cloud.unidata.ucar.edu"
+    DataAccessLayer.changeEDEXHost(edex_url)
+
+`Top <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html>`__
+
+--------------
+
+3 Get a List of Supported Data Types
+------------------------------------
+
+`DataAccessLayer.getSupportedDatatypes() <http://unidata.github.io/python-awips/api/DataAccessLayer.html#awips.dataaccess.DataAccessLayer.getSupportedDatatypes>`__
+returns a list of supported data types offered by the EDEX server
+defined above. The code below shows how to populate, sort, and print out
+that list.
+
+.. code:: ipython3
+
+    dataTypes = DataAccessLayer.getSupportedDatatypes()
+    dataTypes.sort()
+    list(dataTypes)
+
+
+
+
+.. parsed-literal::
+
+    ['acars',
+     'airep',
+     'binlightning',
+     'bufrmosAVN',
+     'bufrmosETA',
+     'bufrmosGFS',
+     'bufrmosHPC',
+     'bufrmosLAMP',
+     'bufrmosMRF',
+     'bufrua',
+     'climate',
+     'common_obs_spatial',
+     'gfe',
+     'gfeEditArea',
+     'grid',
+     'maps',
+     'modelsounding',
+     'obs',
+     'pirep',
+     'practicewarning',
+     'profiler',
+     'radar',
+     'radar_spatial',
+     'satellite',
+     'sfcobs',
+     'topo',
+     'warning']
+
+
+
+`Top <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html>`__
+
+--------------
+
+4 Create a New Data Request and Set the Type
+--------------------------------------------
+
+Now create a new data request using
+`DataAccessLayer.newDataRequest() <http://unidata.github.io/python-awips/api/DataAccessLayer.html#awips.dataaccess.DataAccessLayer.newDataRequest>`__,
+and set the data type using
+`request.setDatatype() <http://unidata.github.io/python-awips/api/IDataRequest.html#awips.dataaccess.IDataRequest.setDatatype>`__.
+Below we create a few different requests with different data types to
+show some differences with other methods.
+
+For this example we are going to look at the **grid** data type, which
+is where the model data can be found, along with some other datasets
+(such as MRMS).
+
+.. code:: ipython3
+
+    # Create a request for data type grid
+    grid_request = DataAccessLayer.newDataRequest()
+    grid_request.setDatatype("grid")
+
+`Top <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html>`__
+
+--------------
+
+5 Get Available Locations
+-------------------------
+
+Use the
+`DataAccessLayer.getAvailableLocationNames(request) <http://unidata.github.io/python-awips/api/DataAccessLayer.html#awips.dataaccess.DataAccessLayer.getAvailableLocationNames>`__
+method to find out what locations are available for the given dataset.
+Typically these will be geographic locations or NWS sites, although in
+some instances it will be something else. Take a look at what’s
+outputted for the grid_request, for example.
+
+.. code:: ipython3
+
+    # Grid Locations
+    grid_locations = DataAccessLayer.getAvailableLocationNames(grid_request)
+    grid_locations.sort()
+    list(grid_locations)
+
+
+
+
+.. parsed-literal::
+
+    ['AUTOSPE',
+     'CMC',
+     'ESTOFS',
+     'ETSS',
+     'FFG-ALR',
+     'FFG-FWR',
+     'FFG-KRF',
+     'FFG-MSR',
+     'FFG-ORN',
+     'FFG-PTR',
+     'FFG-RHA',
+     'FFG-RSA',
+     'FFG-STR',
+     'FFG-TAR',
+     'FFG-TIR',
+     'FFG-TUA',
+     'FNMOC-NCODA',
+     'FNMOC-WW3',
+     'GFS1p0',
+     'GFS20',
+     'HFR-EAST_6KM',
+     'HFR-EAST_PR_6KM',
+     'HFR-US_EAST_DELAWARE_1KM',
+     'HFR-US_EAST_FLORIDA_2KM',
+     'HFR-US_EAST_NORTH_2KM',
+     'HFR-US_EAST_SOUTH_2KM',
+     'HFR-US_EAST_VIRGINIA_1KM',
+     'HFR-US_HAWAII_1KM',
+     'HFR-US_HAWAII_2KM',
+     'HFR-US_HAWAII_6KM',
+     'HFR-US_WEST_500M',
+     'HFR-US_WEST_CENCAL_2KM',
+     'HFR-US_WEST_LOSANGELES_1KM',
+     'HFR-US_WEST_LOSOSOS_1KM',
+     'HFR-US_WEST_NORTH_2KM',
+     'HFR-US_WEST_SANFRAN_1KM',
+     'HFR-US_WEST_SOCAL_2KM',
+     'HFR-US_WEST_WASHINGTON_1KM',
+     'HFR-WEST_6KM',
+     'HPCGuide',
+     'HPCqpfNDFD',
+     'HRRR',
+     'LAMP2p5',
+     'MRMS_0500',
+     'MRMS_1000',
+     'NAM12',
+     'NAM40',
+     'NOHRSC-SNOW',
+     'RAP13',
+     'RTMA',
+     'RTOFS-Now-WestAtl',
+     'RTOFS-Now-WestConus',
+     'RTOFS-WestAtl',
+     'RTOFS-WestConus',
+     'SPCGuide',
+     'SeaIce',
+     'TPCWindProb',
+     'URMA25',
+     'navgem0p5']
+
+
+
+`Top <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html>`__
+
+--------------
+
+6 Get Available Parameters
+--------------------------
+
+We’re setting the “location” (in this case, what model we are interested
+in) to specify our request before we look at the available parameters.
+
+Take a look at the available parameters for the data set by using
+`DataAccessLayer.getAvailableParameters(request) <http://unidata.github.io/python-awips/api/DataAccessLayer.html#awips.dataaccess.DataAccessLayer.getAvailableParameters>`__
+
+.. code:: ipython3
+
+    # Pick a model and set the location for the grid request -- we'll be using the Global Forecast System 20km (GFS20) 
+    grid_request.setLocationNames("GFS20")
+    grid_params = DataAccessLayer.getAvailableParameters(grid_request)
+    grid_params.sort()
+    list(grid_params)
+
+
+
+
+.. parsed-literal::
+
+    ['36SHRMi',
+     '50dbzZ',
+     'AV',
+     'Along',
+     'AppT',
+     'BLI',
+     'BRN',
+     'BRNEHIi',
+     'BRNSHR',
+     'BRNmag',
+     'BRNvec',
+     'BdEPT06',
+     'BlkMag',
+     'BlkShr',
+     'CAPE',
+     'CFRZR',
+     'CFRZR3hr',
+     'CFRZR6hr',
+     'CICEP',
+     'CICEP3hr',
+     'CICEP6hr',
+     'CIn',
+     'CP',
+     'CP-GFS',
+     'CP3hr',
+     'CP6hr',
+     'CPr',
+     'CPrD',
+     'CRAIN',
+     'CRAIN3hr',
+     'CRAIN6hr',
+     'CSNOW',
+     'CSNOW3hr',
+     'CSNOW6hr',
+     'CURU',
+     'CapeStk',
+     'Corf',
+     'CorfF',
+     'CorfFM',
+     'CorfM',
+     'CritT1',
+     'CumNrm',
+     'CumShr',
+     'DivF',
+     'DivFn',
+     'DivFs',
+     'DpD',
+     'DpT',
+     'EHI',
+     'EHI01',
+     'EHIi',
+     'EMSP',
+     'EPT',
+     'EPTA',
+     'EPTC',
+     'EPTGrd',
+     'EPTGrdM',
+     'EPTs',
+     'EPVg',
+     'EPVs',
+     'EPVt1',
+     'EPVt2',
+     'ESP',
+     'ESP2',
+     'FVecs',
+     'FnVecs',
+     'FsVecs',
+     'Fzra1',
+     'Fzra2',
+     'GH',
+     'GHxSM',
+     'GHxSM2',
+     'GVV',
+     'HI',
+     'HI1',
+     'HI3',
+     'HI4',
+     'HIdx',
+     'Heli',
+     'HeliC',
+     'INV',
+     'IPLayer',
+     'Into',
+     'KI',
+     'L-I',
+     'LIsfc2x',
+     'LM5',
+     'LM6',
+     'MAdv',
+     'MCon',
+     'MCon2',
+     'MLLCL',
+     'MMP',
+     'MSFDi',
+     'MSFi',
+     'MSFmi',
+     'MSG',
+     'MTV',
+     'Mix1',
+     'Mix2',
+     'Mmag',
+     'MnT3hr',
+     'MnT6hr',
+     'MpV',
+     'MxT3hr',
+     'MxT6hr',
+     'NBE',
+     'NST',
+     'NST1',
+     'NST2',
+     'P',
+     'P3hr',
+     'P6hr',
+     'PAdv',
+     'PBE',
+     'PEC',
+     'PFrnt',
+     'PGrd',
+     'PGrd1',
+     'PGrdM',
+     'PIVA',
+     'PTvA',
+     'PTyp',
+     'PW',
+     'PW2',
+     'PoT',
+     'PoTA',
+     'QPV1',
+     'QPV2',
+     'QPV3',
+     'QPV4',
+     'RH',
+     'RH_001_bin',
+     'RH_002_bin',
+     'RM5',
+     'RM6',
+     'RMprop',
+     'RMprop2',
+     'RV',
+     'Rain1',
+     'Rain2',
+     'Rain3',
+     'Ro',
+     'SH',
+     'SHx',
+     'SLI',
+     'SNSQ',
+     'SNW',
+     'SNWA',
+     'SRMl',
+     'SRMlM',
+     'SRMm',
+     'SRMmM',
+     'SRMr',
+     'SRMrM',
+     'SSP',
+     'SSi',
+     'STP',
+     'STP1',
+     'Shear',
+     'ShrMag',
+     'Snow1',
+     'Snow2',
+     'Snow3',
+     'SnowT',
+     'St-Pr',
+     'StrTP',
+     'StrmMot',
+     'SuCP',
+     'T',
+     'TAdv',
+     'TGrd',
+     'TGrdM',
+     'TORi',
+     'TORi2',
+     'TP',
+     'TP-GFS',
+     'TP3hr',
+     'TP6hr',
+     'TQIND',
+     'TShrMi',
+     'TV',
+     'TW',
+     'T_001_bin',
+     'Tdef',
+     'Tdend',
+     'ThGrd',
+     'Thom5',
+     'Thom5a',
+     'Thom6',
+     'TmDpD',
+     'Tmax',
+     'Tmin',
+     'Topo',
+     'TotQi',
+     'Tstk',
+     'TwMax',
+     'TwMin',
+     'Twstk',
+     'TxSM',
+     'VAdv',
+     'VAdvAdvection',
+     'VGP',
+     'VSS',
+     'WCD',
+     'WD',
+     'WEASD',
+     'Wind',
+     'WndChl',
+     'ageoW',
+     'ageoWM',
+     'cCape',
+     'cCin',
+     'cTOT',
+     'capeToLvl',
+     'dCape',
+     'dP',
+     'dT',
+     'dVAdv',
+     'dZ',
+     'defV',
+     'del2gH',
+     'df',
+     'fGen',
+     'fnD',
+     'fsD',
+     'gamma',
+     'gammaE',
+     'geoVort',
+     'geoW',
+     'geoWM',
+     'loCape',
+     'maxEPT',
+     'minEPT',
+     'mixRat',
+     'msl-P',
+     'muCape',
+     'pV',
+     'pVeq',
+     'qDiv',
+     'qVec',
+     'qnVec',
+     'qsVec',
+     'shWlt',
+     'snoRat',
+     'snoRatCrocus',
+     'snoRatEMCSREF',
+     'snoRatOv2',
+     'snoRatSPC',
+     'snoRatSPCdeep',
+     'snoRatSPCsurface',
+     'staticCoriolis',
+     'staticSpacing',
+     'staticTopo',
+     'swtIdx',
+     'tTOT',
+     'tWind',
+     'tWindU',
+     'tWindV',
+     'uFX',
+     'uW',
+     'uWStk',
+     'ulSnoRat',
+     'vSmthW',
+     'vTOT',
+     'vW',
+     'vWStk',
+     'wDiv',
+     'wSp',
+     'wSp_001_bin',
+     'wSp_002_bin',
+     'wSp_003_bin',
+     'wSp_004_bin',
+     'zAGL']
+
+
+
+`Top <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html>`__
+
+--------------
+
+7 Get Available Levels
+----------------------
+
+Setting the parameters is just an option, you do not need to filter the
+data if you do not wish to. Also, although we are only setting one
+parameter in this example, you can set multiple parameters by using an
+array:
+
+::
+
+   params = ("param1", "param2", "param3"...)
+   request.setParameters(params)
+
+Set a parameter, from the output above and take a look at what “levels”
+are available for the data set you’re looking at using
+`DataAccessLayer.getAvailableLevels(request) <http://unidata.github.io/python-awips/api/DataAccessLayer.html#awips.dataaccess.DataAccessLayer.getAvailableLevels>`__.
+
+.. container:: alert-warning
+
+   Warning: Not all datasets support levels. If you are trying this with
+   another dataset and run into an exception (error), it’s most likely
+   because levels are not supported for that data type.
+
+.. code:: ipython3
+
+    # For grid data we'll use the temperature parameter ("T")
+    grid_request.setParameters("T")
+    grid_levels = DataAccessLayer.getAvailableLevels(grid_request)
+    for lvl in grid_levels:
+        print(lvl)
+
+
+.. parsed-literal::
+
+    0.0SFC
+    350.0MB
+    610.0_40000.0FHAG
+    120.0_150.0BL
+    900.0MB
+    0.0_610.0FHAG
+    450.0MB
+    575.0MB
+    100.0MB
+    1000.0MB
+    60.0_90.0BL
+    1.0PV
+    950.0MB
+    150.0MB
+    1.5PV
+    700.0MB
+    825.0MB
+    150.0_180.0BL
+    250.0MB
+    1000.0_500.0MB
+    800.0MB
+    4000.0FHAG
+    925.0MB
+    2.0PV
+    0.5PV
+    0.0TROP
+    750.0MB
+    500.0MB
+    625.0MB
+    400.0MB
+    0.0FHAG
+    2.0FHAG
+    875.0MB
+    0.0_1000.0FHAG
+    850.0MB
+    600.0MB
+    725.0MB
+    0.0_6000.0FHAG
+    975.0MB
+    550.0MB
+    0.0_3000.0FHAG
+    675.0MB
+    200.0MB
+    0.0_30.0BL
+    30.0_60.0BL
+    650.0MB
+    525.0MB
+    300.0MB
+    90.0_120.0BL
+    1000.0FHAG
+    775.0MB
+    340.0_350.0K
+    290.0_300.0K
+    700.0_600.0MB
+    700.0_300.0MB
+    320.0Ke
+    800.0_750.0MB
+    60.0TILT
+    5.3TILT
+    1000.0_900.0MB
+    340.0K
+    5500.0_6000.0FHAG
+    255.0K
+    255.0_265.0K
+    3000.0_6000.0FHAG
+    25.0TILT
+    2000.0FHAG
+    0.0_500.0FHAG
+    1000.0_850.0MB
+    850.0_250.0MB
+    280.0_290.0Ke
+    1524.0FHAG
+    320.0_330.0K
+    0.0TILT
+    310.0_320.0Ke
+    310.0Ke
+    330.0K
+    900.0_800.0MB
+    550.0_500.0MB
+    2.4TILT
+    50.0TILT
+    3500.0FHAG
+    35.0TILT
+    12.0TILT
+    300.0_310.0K
+    3000.0_12000.0FHAG
+    0.9TILT
+    320.0K
+    400.0_350.0MB
+    500.0FHAG
+    750.0_700.0MB
+    1000.0_400.0MB
+    345.0K
+    250.0_260.0K
+    300.0Ke
+    290.0Ke
+    950.0_900.0MB
+    4572.0FHAG
+    275.0_285.0Ke
+    335.0Ke
+    295.0_305.0Ke
+    275.0_285.0K
+    600.0_550.0MB
+    310.0K
+    9000.0FHAG
+    335.0K
+    1000.0_7000.0FHAG
+    700.0_500.0MB
+    9144.0FHAG
+    325.0_335.0K
+    2000.0_8000.0FHAG
+    0.0_609.6FHAG
+    300.0K
+    315.0_325.0K
+    325.0K
+    340.0Ke
+    0.0_4000.0FHAG
+    5000.0_5500.0FHAG
+    300.0_250.0MB
+    1.5TILT
+    335.0_345.0K
+    315.0K
+    3.4TILT
+    2500.0FHAG
+    10000.0FHAG
+    0.0_2000.0FHAG
+    7000.0FHAG
+    5000.0FHAG
+    330.0Ke
+    500.0_400.0MB
+    1000.0_1500.0FHAG
+    305.0K
+    285.0_295.0Ke
+    14.0TILT
+    3000.0_3500.0FHAG
+    325.0_335.0Ke
+    2000.0_5000.0FHAG
+    7620.0FHAG
+    850.0_800.0MB
+    6096.0FHAG
+    6000.0_7000.0FHAG
+    2000.0_7000.0FHAG
+    9000.0_10000.0FHAG
+    295.0Ke
+    305.0Ke
+    265.0_275.0K
+    7000.0_8000.0FHAG
+    3000.0_8000.0FHAG
+    700.0_650.0MB
+    1000.0_6000.0FHAG
+    0.5TILT
+    450.0_400.0MB
+    1.8TILT
+    330.0_340.0K
+    800.0_700.0MB
+    850.0_300.0MB
+    6.0TILT
+    900.0_850.0MB
+    3657.6FHAG
+    0.0_5000.0FHAG
+    320.0_330.0Ke
+    8.7TILT
+    650.0_600.0MB
+    600.0_400.0MB
+    55.0TILT
+    270.0_280.0Ke
+    30.0TILT
+    310.0_320.0K
+    1500.0FHAG
+    1000.0_950.0MB
+    5500.0FHAG
+    250.0_200.0MB
+    500.0_1000.0FHAG
+    400.0_300.0MB
+    500.0_100.0MB
+    1000.0_3000.0FHAG
+    8000.0FHAG
+    285.0Ke
+    290.0K
+    305.0_315.0K
+    285.0_295.0K
+    0.0_2500.0FHAG
+    925.0_850.0MB
+    275.0Ke
+    1500.0_2000.0FHAG
+    300.0_200.0MB
+    260.0_270.0K
+    2743.2FHAG
+    3000.0FHAG
+    315.0_325.0Ke
+    600.0_500.0MB
+    16.7TILT
+    280.0K
+    500.0_250.0MB
+    40.0TILT
+    3048.0FHAG
+    400.0_200.0MB
+    300.0_310.0Ke
+    270.0_280.0K
+    1000.0_700.0MB
+    45.0TILT
+    850.0_500.0MB
+    2500.0_3000.0FHAG
+    609.6FHAG
+    0.0_8000.0FHAG
+    295.0K
+    4.3TILT
+    295.0_305.0K
+    330.0_340.0Ke
+    270.0K
+    4000.0_4500.0FHAG
+    280.0_290.0K
+    925.0_700.0MB
+    0.0_1500.0FHAG
+    260.0K
+    10.0TILT
+    3500.0_4000.0FHAG
+    325.0Ke
+    285.0K
+    290.0_300.0Ke
+    7.5TILT
+    1828.8FHAG
+    280.0Ke
+    500.0_450.0MB
+    305.0_315.0Ke
+    250.0K
+    4500.0FHAG
+    1250.0FHAG
+    0.0_10000.0FHAG
+    4500.0_5000.0FHAG
+    250.0_350.0K
+    270.0Ke
+    275.0K
+    315.0Ke
+    500.0_300.0MB
+    350.0_300.0MB
+    750.0FHAG
+    19.5TILT
+    2000.0_2500.0FHAG
+    850.0_700.0MB
+    350.0K
+    265.0K
+    6000.0FHAG
+    8000.0_9000.0FHAG
+    700.0_300.0LYRMB
+    850.0_700.0LYRMB
+    1000.0_500.0LYRMB
+
+
+.. container:: alert-info
+
+   Note:
+
+   .. raw:: html
+
+      <li>
+
+   0.0SFC is the Surface level
+
+   .. raw:: html
+
+      </li>
+
+   ::
+
+      <li><b>HAG</b> stands for Fixed Height Above Ground (in meters)</li>
+      <li><b>NTAT</b> stands for Nominal Top of the ATmosphere</li>
+      <li><b>BL</b> stands for Boundary Layer, where <b>0.0_30.0BL</b> reads as <i>0-30 mb above ground level</i></li> 
+      <li><b>TROP</b> is the Tropopause level
+
+.. code:: ipython3
+
+    # We'll set the level to surface level
+    grid_request.setLevels("0.0SFC")
+
+`Top <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html>`__
+
+--------------
+
+8 Get Available Times
+---------------------
+
+Take a look at what time options are available for the data you’re
+looking at using the
+`DataAccessLayer.getAvailableTimes() <http://unidata.github.io/python-awips/api/DataAccessLayer.html#awips.dataaccess.DataAccessLayer.getAvailableTimes>`__
+method:
+
+-  **getAvailableTimes(request, True)** will return an object of *run
+   times* - formatted as ``YYYY-MM-DD HH:MM:SS``
+-  **getAvailableTimes(request)** will return an object of all times -
+   formatted as ``YYYY-MM-DD HH:MM:SS (F:ff)``
+-  **getForecastRun(cycle, times)** will return a DataTime array for a
+   single forecast cycle.
+
+.. code:: ipython3
+
+    # Available grid times
+    grid_cycles = DataAccessLayer.getAvailableTimes(grid_request, True)
+    grid_times = DataAccessLayer.getAvailableTimes(grid_request)
+    ## Using -1 in an array will access the last element of the array 
+    ##  (using -2 will access the second last element, and so on)
+    grid_fcstRun = DataAccessLayer.getForecastRun(grid_cycles[-1], grid_times)
+    
+    ## print out the time instances
+    times = []
+    for fcst in grid_fcstRun:
+        print(fcst.getRefTime(), ':', fcst.getFcstTime(), 'seconds')
+
+
+.. parsed-literal::
+
+    2021-06-01 12:00:00.000 : 0 seconds
+    2021-06-01 12:00:00.000 : 10800 seconds
+    2021-06-01 12:00:00.000 : 21600 seconds
+    2021-06-01 12:00:00.000 : 32400 seconds
+    2021-06-01 12:00:00.000 : 43200 seconds
+    2021-06-01 12:00:00.000 : 54000 seconds
+    2021-06-01 12:00:00.000 : 64800 seconds
+    2021-06-01 12:00:00.000 : 75600 seconds
+    2021-06-01 12:00:00.000 : 86400 seconds
+    2021-06-01 12:00:00.000 : 97200 seconds
+    2021-06-01 12:00:00.000 : 108000 seconds
+    2021-06-01 12:00:00.000 : 118800 seconds
+    2021-06-01 12:00:00.000 : 129600 seconds
+    2021-06-01 12:00:00.000 : 140400 seconds
+    2021-06-01 12:00:00.000 : 151200 seconds
+    2021-06-01 12:00:00.000 : 162000 seconds
+    2021-06-01 12:00:00.000 : 172800 seconds
+    2021-06-01 12:00:00.000 : 183600 seconds
+    2021-06-01 12:00:00.000 : 194400 seconds
+    2021-06-01 12:00:00.000 : 205200 seconds
+    2021-06-01 12:00:00.000 : 216000 seconds
+    2021-06-01 12:00:00.000 : 226800 seconds
+    2021-06-01 12:00:00.000 : 237600 seconds
+    2021-06-01 12:00:00.000 : 248400 seconds
+    2021-06-01 12:00:00.000 : 259200 seconds
+    2021-06-01 12:00:00.000 : 270000 seconds
+    2021-06-01 12:00:00.000 : 280800 seconds
+    2021-06-01 12:00:00.000 : 291600 seconds
+    2021-06-01 12:00:00.000 : 302400 seconds
+    2021-06-01 12:00:00.000 : 324000 seconds
+    2021-06-01 12:00:00.000 : 345600 seconds
+    2021-06-01 12:00:00.000 : 367200 seconds
+    2021-06-01 12:00:00.000 : 388800 seconds
+    2021-06-01 12:00:00.000 : 410400 seconds
+    2021-06-01 12:00:00.000 : 432000 seconds
+    2021-06-01 12:00:00.000 : 453600 seconds
+    2021-06-01 12:00:00.000 : 475200 seconds
+    2021-06-01 12:00:00.000 : 496800 seconds
+    2021-06-01 12:00:00.000 : 518400 seconds
+    2021-06-01 12:00:00.000 : 540000 seconds
+    2021-06-01 12:00:00.000 : 561600 seconds
+    2021-06-01 12:00:00.000 : 583200 seconds
+    2021-06-01 12:00:00.000 : 604800 seconds
+    2021-06-01 12:00:00.000 : 626400 seconds
+    2021-06-01 12:00:00.000 : 648000 seconds
+    2021-06-01 12:00:00.000 : 669600 seconds
+    2021-06-01 12:00:00.000 : 691200 seconds
+    2021-06-01 12:00:00.000 : 712800 seconds
+    2021-06-01 12:00:00.000 : 734400 seconds
+    2021-06-01 12:00:00.000 : 756000 seconds
+    2021-06-01 12:00:00.000 : 777600 seconds
+    2021-06-01 12:00:00.000 : 799200 seconds
+    2021-06-01 12:00:00.000 : 820800 seconds
+    2021-06-01 12:00:00.000 : 842400 seconds
+    2021-06-01 12:00:00.000 : 864000 seconds
+
+
+`Top <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html>`__
+
+--------------
+
+9 Get the Data!
+---------------
+
+Now that we have our ``request`` and DataTime ``fcstRun`` arrays ready,
+it’s time to request the data array from EDEX. Depending on what kind of
+data we’re working with, we’ll either use
+`DataAccessLayer.getGridData() <http://unidata.github.io/python-awips/api/DataAccessLayer.html#awips.dataaccess.DataAccessLayer.getGridData>`__
+or
+`DataAccessLayer.getGeometryData() <http://unidata.github.io/python-awips/api/DataAccessLayer.html#awips.dataaccess.DataAccessLayer.getGeometryData>`__
+
+.. container:: alert-info
+
+   Note: We have more, detailed notebooks about how analyze and
+   visualize the data once you have what you want.
+
+.. code:: ipython3
+
+    ## Grid Data
+    grid_response = DataAccessLayer.getGridData(grid_request, [grid_fcstRun[-1]])
+    for grid in grid_response:
+        grid_data = grid.getRawData()
+        lons, lats = grid.getLatLonCoords()
+        print('Time :', grid.getDataTime(), "-", grid.getDataTime().getFcstTime(), 'seconds')
+    
+    ## Take a look at some information in our data
+    print('Model:', str(grid.getLocationName()))
+    print('Parm :', str(grid.getParameter()))
+    print('Unit :', str(grid.getUnit()))
+    print(grid_data.shape)
+
+
+.. parsed-literal::
+
+    Time : 2021-06-01 12:00:00 - 864000 seconds
+    Model: GFS20
+    Parm : T
+    Unit : K
+    (257, 369)
+
+
+`Top <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html>`__
+
+--------------
+
+10 See Also
+-----------
+
+Several functions are used throughout this notebook from the
+DataAccessLayer class in python-awips, to see full documentation for
+these functions vist
+`here <http://unidata.github.io/python-awips/api/DataAccessLayer.html#>`__.
+
+10.1 Related Notebooks
+~~~~~~~~~~~~~~~~~~~~~~
+
+-  `Colored Surface Temperature
+   Plot <https://unidata.github.io/python-awips/examples/generated/Colored_Surface_Temperature_Plot.html>`__
+-  `Grids and
+   Cartopy <https://unidata.github.io/python-awips/examples/generated/Grids_and_Cartopy.html>`__
+-  `Satellite
+   Imagery <https://unidata.github.io/python-awips/examples/generated/Satellite_Imagery.html>`__
+-  `Upper Air BUFR
+   Soundings <https://unidata.github.io/python-awips/examples/generated/Upper_Air_BUFR_Soundings.html>`__
+-  `Maps Resources and
+   Topography <https://unidata.github.io/python-awips/examples/generated/Map_Resources_and_Topography.html>`__
+
+`Top <https://unidata.github.io/python-awips/examples/generated/Grid_Levels_and_Parameters.html>`__
+
+--------------
